@@ -107,6 +107,12 @@ int main() {
     // Налаштування локалі для коректного відображення кирилиці
     setlocale(LC_ALL, "en_US.UTF-8");
     
+    // Введення кількості потоків
+    int numThreads;
+    cout << "Введіть кількість потоків: ";
+    cin >> numThreads;
+    omp_set_num_threads(numThreads);
+    
     // Введення розмірів матриці
     int rows, cols;
     cout << "Введіть кількість рядків: ";
