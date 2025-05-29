@@ -13,7 +13,7 @@ void fillMatrix(vector<vector<int>>& matrix, int rows, int cols) {
     // Ініціалізація генератора випадкових чисел
     random_device rd;
     mt19937 gen(rd());
-    uniform_int_distribution<> dis(1, 100); // Генерація чисел від 1 до 100
+    uniform_int_distribution<> dis(1, 100); 
 
     matrix.resize(rows);
     for (int i = 0; i < rows; ++i) {
@@ -66,7 +66,7 @@ void minRowSum(const vector<vector<int>>& matrix, int& minRowIdx, int& minSum) {
                 localMinRowIdx = i;
             }
         }
-        #pragma omp critical // Критична секція для безпечного оновлення глобальних змінних
+        #pragma omp critical // Критична секція для оновлення глобальних змінних
         {
             if (localMinSum < minSum) {
                 minSum = localMinSum;
@@ -104,36 +104,29 @@ void minRowSumSequential(const vector<vector<int>>& matrix, int& minRowIdx, int&
 }
 
 int main() {
-    // Налаштування локалі для коректного відображення кирилиці
     setlocale(LC_ALL, "en_US.UTF-8");
     
-    // Введення кількості потоків
     int numThreads;
     cout << "Введіть кількість потоків: ";
     cin >> numThreads;
     omp_set_num_threads(numThreads);
     
-    // Введення розмірів матриці
     int rows, cols;
     cout << "Введіть кількість рядків: ";
     cin >> rows;
     cout << "Введіть кількість стовпців: ";
     cin >> cols;
 
-    // Створення та заповнення матриці
     vector<vector<int>> matrix;
     fillMatrix(matrix, rows, cols);
 
-    // Виведення згенерованої матриці
     cout << "\nЗгенерована матриця:" << endl;
     printMatrix(matrix);
 
-    // Змінні для зберігання результатів
     int totalSum = 0, totalSumSeq = 0;
     int minRowIdx = -1, minSum = 0;
     int minRowIdxSeq = -1, minSumSeq = 0;
 
-    // Змінні для вимірювання часу виконання
     double t1, t2, t3, t4, t5, t6, t7, t8;
 
     // Послідовне виконання
@@ -154,7 +147,6 @@ int main() {
     minRowSum(matrix, minRowIdx, minSum);
     t8 = omp_get_wtime();
 
-    // Виведення результатів
     cout << "\nРезультати:" << endl;
     cout << "Загальна сума всіх елементів (послідовно): " << totalSumSeq << endl;
     cout << "Загальна сума всіх елементів (паралельно): " << totalSum << endl;
@@ -168,7 +160,6 @@ int main() {
     cout << "Час пошуку мінімального рядка (послідовно): " << (t4-t3) << " секунд" << endl;
     cout << "Час пошуку мінімального рядка (паралельно): " << (t8-t7) << " секунд" << endl;
 
-    // Очікування натискання Enter перед завершенням програми
     cout << "\nНатисніть Enter для завершення...";
     cin.ignore();
     cin.get();
