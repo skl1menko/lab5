@@ -106,6 +106,8 @@ void minRowSumSequential(const vector<vector<int>>& matrix, int& minRowIdx, int&
 int main() {
     setlocale(LC_ALL, "en_US.UTF-8");
     
+    omp_set_nested(1);
+    
     int numThreads;
     cout << "Введіть кількість потоків: ";
     cin >> numThreads;
@@ -123,42 +125,51 @@ int main() {
     cout << "\nЗгенерована матриця:" << endl;
     printMatrix(matrix);
 
-    int totalSum = 0, totalSumSeq = 0;
-    int minRowIdx = -1, minSum = 0;
-    int minRowIdxSeq = -1, minSumSeq = 0;
+    int totalSum = 0;
+    int minRowIdx = -1, minSum = INT_MAX;
 
-    double t1, t2, t3, t4, t5, t6, t7, t8;
-
-    // Послідовне виконання
+    double t1, t2;
     t1 = omp_get_wtime();
-    totalSumSeq = sumAllElementsSequential(matrix);
-    t2 = omp_get_wtime();
-    
-    t3 = omp_get_wtime();
-    minRowSumSequential(matrix, minRowIdxSeq, minSumSeq);
-    t4 = omp_get_wtime();
 
-    // Паралельне виконання
-    t5 = omp_get_wtime();
-    totalSum = sumAllElements(matrix);
-    t6 = omp_get_wtime();
-    
-    t7 = omp_get_wtime();
-    minRowSum(matrix, minRowIdx, minSum);
-    t8 = omp_get_wtime();
+    #pragma omp parallel sections
+    {
+        #pragma omp section
+        {
+            totalSum = sumAllElements(matrix);
+        }
+        
+        #pragma omp section
+        {
+            minRowSum(matrix, minRowIdx, minSum);
+        }
+    }
+
+    t2 = omp_get_wtime();
 
     cout << "\nРезультати:" << endl;
-    cout << "Загальна сума всіх елементів (послідовно): " << totalSumSeq << endl;
-    cout << "Загальна сума всіх елементів (паралельно): " << totalSum << endl;
-    cout << "Час обчислення суми (послідовно): " << (t2-t1) << " секунд" << endl;
-    cout << "Час обчислення суми (паралельно): " << (t6-t5) << " секунд" << endl;
-    
-    cout << "\nНомер рядка з мінімальною сумою (послідовно): " << minRowIdxSeq + 1 << endl;
-    cout << "Номер рядка з мінімальною сумою (паралельно): " << minRowIdx + 1 << endl;
-    cout << "Мінімальна сума елементів рядка (послідовно): " << minSumSeq << endl;
-    cout << "Мінімальна сума елементів рядка (паралельно): " << minSum << endl;
-    cout << "Час пошуку мінімального рядка (послідовно): " << (t4-t3) << " секунд" << endl;
-    cout << "Час пошуку мінімального рядка (паралельно): " << (t8-t7) << " секунд" << endl;
+    cout << "Загальна сума всіх елементів: " << totalSum << endl;
+    cout << "Номер рядка з мінімальною сумою: " << minRowIdx + 1 << endl;
+    cout << "Мінімальна сума елементів рядка: " << minSum << endl;
+    cout << "Загальний час виконання (паралельне): " << (t2-t1) << " секунд" << endl;
+
+    // Послідовне виконання
+    int seqTotalSum = 0;
+    int seqMinRowIdx = -1, seqMinSum = INT_MAX;
+
+    double seq_t1, seq_t2;
+    seq_t1 = omp_get_wtime();
+
+    seqTotalSum = sumAllElementsSequential(matrix);
+    minRowSumSequential(matrix, seqMinRowIdx, seqMinSum);
+
+    seq_t2 = omp_get_wtime();
+
+    cout << "\nРезультати послідовного виконання:" << endl;
+    cout << "Загальна сума всіх елементів: " << seqTotalSum << endl;
+    cout << "Номер рядка з мінімальною сумою: " << seqMinRowIdx + 1 << endl;
+    cout << "Мінімальна сума елементів рядка: " << seqMinSum << endl;
+    cout << "Загальний час виконання (послідовне): " << (seq_t2-seq_t1) << " секунд" << endl;
+
 
     cout << "\nНатисніть Enter для завершення...";
     cin.ignore();
